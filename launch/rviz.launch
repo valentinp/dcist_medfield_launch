@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<launch>
+    <arg name="name" default="acl_jackal"/>
+    <arg name="replay" default="false"/>
+    <arg name="viz_config" default="$(find dcist_medfield_launch)/rviz/acl_jackal.rviz"/>
+
+    <rosparam file="$(find dcist_medfield_launch)/launch/team_panel_config.yaml" ns="/rviz"/>
+    <rosparam subst_value="true" ns="/rviz/team_panel/robots">robot1: $(arg name)</rosparam>
+
+    <group ns="$(arg name)">
+        <node pkg="zip" type="map_zip" name="map_d" args="decompress point_cloud_cache/renderers/full_map" />
+        <node name="rviz" type="rviz" pkg="rviz" args="-d $(arg viz_config)"> </node>
+
+    <node name="worldmodel_rviz" pkg="arl_worldmodel_rviz" type="node" output="screen">
+      <param name="marker_period" value="0.2"/>
+    </node>
+
+    </group>
+
+</launch>

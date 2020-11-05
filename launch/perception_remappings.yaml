@@ -1,0 +1,133 @@
+# match: type regex / name regex
+
+# --------------------------------------------------
+# Normalize object classes (for language grounding)
+# --------------------------------------------------
+
+# Cone types
+- match: ConstructionCone
+  type: cone
+  semantic: traffic
+
+# Barrel types
+- match: ConstructionBarrel
+  type: barrel
+- match: Barrel
+  type: barrel
+
+# Case types
+- match: WoodenCase
+  type: case
+- match: pelican_case
+  type: case
+- match: cabinet
+  type: case
+
+# Crate types
+- match: CardboardBox
+  type: crate
+
+# Door types
+- match: .*door.*
+  type: door
+- match: .*ingress.*
+  type: door
+- match: Door
+  type: door
+
+# Window types
+- match: Window
+  type: window
+
+# Person types
+- match: Person_Walking
+  type: person
+- match: Person_Standing
+  type: person
+- match: Person
+  type: person
+
+# Vehicle types
+- match: truck
+  type: vehicle
+- match: car
+  type: vehicle
+
+# Light poles
+- match: "light pole"
+  type: pole
+- match: light\ pole
+  type: pole
+
+# Others
+- match: tires
+  type: tire
+- match: "gas pump"
+  type: gas_pump
+- match: banana
+  type: produce
+- match: "trash bin"
+  type: barrel
+- match: Dumpster
+  type: dumpster
+
+# --------------------------------------------------
+# Blacklisted objects
+# --------------------------------------------------
+
+- match: pole
+  blacklist: true
+- match: shop
+  blacklist: true
+# Generically-named buildings
+- match: /Feature\d+
+  blacklist: true
+# System objects
+- match: System
+  blacklist: true
+
+# --------------------------------------------------
+# Incorporate special buildings
+# --------------------------------------------------
+
+# Remap special building semantics
+- match: /Church
+  type: building
+  semantic: church
+- match: /Town\ House
+  type: building
+  semantic: house
+- match: /Town\ House
+  type: building
+  semantic: house
+
+# Standardize type for all other buildings
+- match: Building
+  type: building
+
+# --------------------------------------------------
+# Dynamic objects
+# --------------------------------------------------
+
+- match: people
+  dynamic: true
+- match: person
+  dynamic: true
+- match: weapons
+  dynamic: true
+- match: vehicle
+  dynamic: false
+- match: CardboardBox
+  dynamic: true
+
+# --------------------------------------------------
+# Waypoint names
+# --------------------------------------------------
+
+- match: region/[Ww]aypoint_[Aa]lpha
+  semantic: waypoint
+  alpha: true
+- match: region/[Ww]aypoint_[Bb]ravo
+  semantic: waypoint
+  bravo: true
+

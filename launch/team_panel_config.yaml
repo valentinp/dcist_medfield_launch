@@ -1,0 +1,77 @@
+team_behavior_graph:
+  node_height: 0.25
+  edge_width: 0.1
+  select_radius: 1.0
+  z_height: 0.0
+  node_alpha: 0.5
+  highlight_alpha: 0.5
+  inactive_alpha: 0.1
+
+  node_color: blue
+  edge_color: tomato
+  inactive_node_color: dimgray
+  inactive_edge_color: dimgray
+
+  action_colors:
+    collect: orange
+    safe: cyan
+    keep_out: red
+    keep_in: green
+    intersection: gold
+
+  action_alphas:
+    keep_out: 0.05
+    keep_in: 0.05
+    region_stroke: 0.05
+
+  highlight_colors:
+    verified: gold
+    executing: darkgreen
+    robot: hotpink1
+    current: darkseagreen1
+    selected: gold
+
+team_panel:
+  robots: { }
+  behavior_client_topic: behavior/arlsm
+  keys:
+    reset: "Ctrl+R"
+    reset_all: "Shift+Ctrl+R"
+  populate_all_behaviors: false
+  behaviors:
+    - GotoRegionSubPanel:
+        key: "Shift+Ctrl+G"
+        default_action: region
+        default: true
+        keys:
+          execute: e
+          cancel: x
+    - ExternalPathSubPanel:
+        key: "Shift+Ctrl+E"
+        default_action: stroke
+        keys:
+          execute: e
+          cancel: x
+    - NavigationConstraintsSubPanel:
+        default_action: stroke
+    - MissionSubPanel:
+        key: "Shift+Ctrl+N"
+        default_action: region
+        keys:
+          auto_add_edge: a
+          add_edge: e
+          delete_edge: d
+    - ARLWorldmodelSubPanel:
+        key: "Shift+Ctrl+O"
+        default_action: region
+    - NLUSubPanel:
+        key: "Shift+Ctrl+L"
+        default_action: region
+
+#  icons:
+#    region: package://team_rviz_panel/icons/region.png
+#    delete: package://team_rviz_panel/icons/delete.png
+#    delete_edge: package://team_rviz_panel/icons/delete_edge.png
+#    add_edge: package://team_rviz_panel/icons/add_edge.png
+#    safe: package://team_rviz_panel/icons/safe.png
+#    collect: package://team_rviz_panel/icons/collect.png
