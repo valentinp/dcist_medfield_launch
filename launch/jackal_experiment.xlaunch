@@ -949,5 +949,5 @@
   </rosparam>
   <param command="/home/swarm/phoenix/phoenix-r1/install/lib/xacro/xacro $(find hardware_launch)/urdf/robot.urdf.xacro calibrating:=False config:=$(find hardware_launch)/config/acl_jackal.yaml calibration_file:=$(find hardware_launch)/calibration/acl_jackal.yaml config_yaml:=&quot;{name: acl_jackal}&quot;" name="acl_jackal/robot_description" />
 <node pkg="barrel_scout" type="scout.py" name="barrel_detection_republisher" />
-
+<node pkg="odom_originator" type="originator.py" name="odom_originator" doc="ensures base to odom TF is identity on launch" />
 </launch> 
