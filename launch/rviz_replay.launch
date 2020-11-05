@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<launch>
+    <arg name="name" default="acl_jackal"/>
+    <arg name="viz_config" default="$(find dcist_medfield_launch)/rviz/acl_jackal_replay.rviz"/>
+
+    <rosparam file="$(find dcist_medfield_launch)/launch/team_panel_config.yaml" ns="/rviz"/>
+    <rosparam subst_value="true" ns="/rviz/team_panel/robots">robot1: $(arg name)</rosparam>
+
+    <group ns="$(arg name)">
+        <node name="rviz" type="rviz" pkg="rviz" args="-d $(arg viz_config)"> </node>
+	<node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+    </group>
+
+</launch>
