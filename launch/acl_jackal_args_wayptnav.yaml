@@ -1,0 +1,82 @@
+# Robot name (e.g. warty, chinook)
+name: acl_jackal
+# Robot type (e.g. warthog, husky)
+platform: jackal
+pc_assembler: false
+odometry: false
+terrain_projection: false
+intelligence: false
+object_localization: false
+pixel_classification: false
+object_tracking: false
+object_fusion: false
+slam: true
+navigation_behaviors: true
+config: acl_jackal
+waypoint_navigation: true 
+use_mppi: true
+object_detection: false 
+# Disables all functions unless explicitly defined as enabled.
+optin: false
+hardware:
+  enable_platform: true
+  enable_cameras: true
+  enable_lasers: true
+  enable_imus: true
+  enable_gps: false
+  cameras:
+    realsense:
+      forward:
+        enabled: true
+        args:
+          enable_infra1: true
+          enable_infra2: true
+          enable_gyro: true
+          enable_accel: true
+          unite_imu_method: linear_interpolation
+          serial_no: ''
+          machine: localhost
+          enable_depth: true
+          enable_fisheye: false
+  lasers:
+    velodyne:
+      velodyne:
+        enabled: true
+        args:
+          type: VLP-16
+          topic: lidar_points
+  imus:
+    microstrain:
+      microstrain:
+        enabled: true
+        args:
+          hardware_sync: false
+          use_filtered_orientation: false
+          enable_gps: false
+  # Run in calibration mode; sensor locations become dynamically-reconfigurable.
+  calibrating: false
+control:
+  # Enable teleoperation control modes.
+  teleop: true
+  # Enable joystick teleoperation control.
+  joystick: true
+  # Joystick device to use.
+  joy_dev: /dev/input/js0
+ioc_traversal:
+  machine: localhost
+  ioc_config: simple_test.p
+  landmine_config_file: intel_empty.yaml
+  feature_topics: '[/acl_jackal/point_cloud_cache/renderers/full_map,       /acl_jackal/visual_cache/grass,       /acl_jackal/visual_cache/road]'
+  allow_intervention: false
+  intervention_output_dir: /var/tmp/ioc_intervention
+lidar_camera_projection:
+  machine: localhost
+  camera: forward
+  image_topic: pixel_classification/labeled_image
+  original_topic: pixel_classification/original_image
+  semantic_topic: pixel_classification/semantic_image
+  service_topic: segment_image
+  info_topic: camera_info
+  pcd_topic: lidar_points
+  fixed_frame: acl_jackal/odom
+  ontology_format: default

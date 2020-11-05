@@ -37,13 +37,12 @@ ROBOT_NAME:  # these topics WILL have the robot name prepended ("blah" -> "chino
   - jackal_velocity_controller/cmd_vel_out
   - forward/color/camera_info
   - forward/color/image_raw/compressed
-#  - forward/color/image_raw
-  - forward/aligned_depth_to_color/camera_info
-  - forward/aligned_depth_to_color/image_raw/compressedDepth
+#  - forward/aligned_depth_to_color/camera_info
+#  - forward/aligned_depth_to_color/image_raw/compressedDepth
   - forward/infra1/camera_info
   - forward/infra1/image_rect_raw/compressed
-  - forward/infra2/camera_info
-  - forward/infra2/image_rect_raw/compressed
+#  - forward/infra2/camera_info
+#  - forward/infra2/image_rect_raw/compressed
   - forward/imu_info
   - forward/imu
   - forward/extrinsics/depth_to_color

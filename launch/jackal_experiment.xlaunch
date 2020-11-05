@@ -1,0 +1,954 @@
+<launch>
+  <rosarg>
+    # Robot name (e.g. warty, chinook)
+    name: acl_jackal
+    # Robot type (e.g. warthog, husky)
+    platform: jackal
+    pc_assembler: true
+    pixel_classification: false
+    config: acl_jackal
+    # Disables all functions unless explicitly defined as enabled.
+    optin: false
+    hardware:
+      enable_platform: true
+      enable_cameras: true
+      enable_lasers: true
+      enable_imus: true
+      enable_gps: false
+      # Run in calibration mode; sensor locations become dynamically-reconfigurable.
+      calibrating: false
+      cameras:
+        realsense:
+          forward:
+            enabled: true
+            args:
+              enable_infra1: true
+              enable_infra2: true
+              enable_gyro: true
+              enable_accel: true
+              initial_reset: false
+              serial_no: ''
+              machine: localhost
+              enable_depth: true
+              enable_fisheye: false
+      lasers:
+        velodyne:
+          velodyne:
+            enabled: true
+            args:
+              type: VLP-16
+              topic: lidar_points
+      imus:
+        microstrain:
+          microstrain:
+            enabled: true
+            args:
+              hardware_sync: false
+              use_filtered_orientation: false
+              enable_gps: false
+    control:
+      # Enable teleoperation control modes.
+      teleop: true
+      # Enable joystick teleoperation control.
+      joystick: true
+      # Joystick device to use.
+      joy_dev: /dev/input/js0
+    object_detection:
+      enabled: true
+      # The network to use for object detection (maskrcnn)
+      algorithm: maskrcnn
+      # The image topic to perform detections on.
+      image_topic: /acl_jackal/forward/color/image_raw
+      # The detection model architecture description (yaml).
+      config_name: /home/swarm/phoenix-r1/install/share/maskrcnn_benchmark_ros/configs/e2e_faster_rcnn_R_50_FPN_1x_t2_v5.yaml
+      # The detection model weights (.pth python pickle file)
+      model_name: /home/swarm/phoenix-r1/install/share/maskrcnn_benchmark_ros/models/t2_v5_0006000.pth
+      # The machine where object detection will be run.
+      machine: jetson
+      # The classification confidence threshold for a detection.
+      confidence: 0.8
+      autostart: true
+      use_gpu: true
+      min_image_size: 480
+      remove_overlap: 1
+      overlap_threshold: 0.5
+    odometry:
+      # Run simple (legacy) odometry.
+      run_simple: false
+      # Run EKF-based odometry.
+      run_ekf: false
+      # Run visual-inertial odometry (requires stereo camera pair time synced to IMU).
+      run_vio: false
+    intelligence:
+      use_psg: 0
+      use_nlg: 0
+      use_iwm: 1
+      use_me: 1
+      use_mp: 1
+    terrain_projection:
+      use_unity: true
+      throttle_rate: 1.0
+      camera: forward
+      static_frame: acl_jackal/odom
+      image_topic: /acl_jackal/forward/pixel_classification/semantic_image
+      pose_graph_topic: /acl_jackal/pose_graph
+      grid_topic: /acl_jackal/point_cloud_cache/renderers/full_map
+      project_to_horizon: false
+      range: 5
+    object_localization:
+      enabled: true
+      camera_info_topic: /acl_jackal/forward/color/camera_info
+      camera_topic: /acl_jackal/camera/rgb
+      pointcloud_topic: lidar_points
+    object_fusion:
+      # The machine where object detection will be run.
+      enabled: true
+      machine: localhost
+      # File to manage perceptual remappings, blacklisting, etc
+      perception_remappings_file: $(find perception_launch)/launch/perception_remappings.yaml
+    slam:
+      # Run in 3D mode (as opposed to planar).
+      mode_3d_odometry: true
+      # Use message stream pipeline (as opposed to omnicache).
+      use_message_stream_pipeline: 1
+      # Method to use to check for loop closures and relative poses. 'icp|ndt'
+      pose_query_method: icp
+      # Incoming point cloud topic to use.
+      incoming_cloud_topic: /acl_jackal/lidar_points
+      # Save the map on shutdown.
+      save_map: false
+      # Load a saved map on startup.
+      load_map: false
+      save_file: $(find mapping_launch)/config/map
+      load_file: $(find mapping_launch)/config/map
+    navigation_behaviors:
+      # Enable IOC-based behavior
+      ioc: true
+      # Enable native navigation behavior
+      native: true
+      # Map topic to use for navigation and planning behaviors
+      map_topic: /acl_jackal/point_cloud_cache/renderers/full_map
+    ioc_traversal:
+      machine: localhost
+      ioc_config: simple_test.p
+      landmine_config_file: intel_empty.yaml
+      feature_topics: '[/acl_jackal/point_cloud_cache/renderers/full_map,       /acl_jackal/visual_cache/grass,       /acl_jackal/visual_cache/road]'
+      allow_intervention: false
+      intervention_output_dir: /var/tmp/ioc_intervention
+    lidar_camera_projection:
+      machine: localhost
+      camera: forward
+      image_topic: pixel_classification/labeled_image
+      original_topic: pixel_classification/original_image
+      semantic_topic: pixel_classification/semantic_image
+      service_topic: segment_image
+      info_topic: camera_info
+      pcd_topic: lidar_points
+      fixed_frame: acl_jackal/odom
+      ontology_format: default
+    object_tracking:
+      enabled: true
+      image_topic: /acl_jackal/forward/color/image_raw
+      machine: localhost
+      camera: forward
+      detection_topic: detection_out_topic
+      use_image_topic: false
+      use_detection_topic: true
+      tracker_type: NAIVE
+      reset_on_detection: true
+      filter_2class: true
+      detection_conf_threshold: 0.8
+      f2f_match_threshold: 0.0
+      missed_detection_threshold: 0
+      target_framerate: 20.0
+      visualize: true
+    waypoint_navigation:
+      enabled: true
+      use_mppi: 1
+      map_topic: /acl_jackal/point_cloud_cache/renderers/full_map
+      local_map_topic: /acl_jackal/local_point_cloud_cache/renderers/recent_map
+      use_joy: false
+      local_costmap_config: recent_cache_local_costmap.yaml
+      global_costmap_config: global_costmap.yaml
+      standalone_global_costmap: true
+      standalone_local_costmap: true
+  </rosarg>
+  <include argns="*" file="$(find phoenix_launch)/launch/robot.xlaunch" />
+  <rosparam>
+    acl_jackal:
+      jackal_node:
+        require:
+          publishers:
+          - status
+          - feedback
+          - imu/data_raw
+          - navsat/nmea_sentence
+          subscribers:
+          - cmd_drive
+          - wifi_connected
+        wireless_interface: wlp2s0
+      navsat: {}
+      imu_filter:
+        use_mag: false
+        mag_bias_x: 0
+        mag_bias_y: 0
+        mag_bias_z: 0
+        gain: 0.1
+        zeta: 0.001
+        publish_tf: false
+        use_magnetic_field_msg: false
+      diagnostic_aggregator:
+        analyzers:
+          jackal:
+            type: diagnostic_aggregator/AnalyzerGroup
+            path: Jackal Base
+            analyzers:
+              general:
+                type: diagnostic_aggregator/GenericAnalyzer
+                path: General
+                remove_prefix: 'jackal_node'
+                timeout: 5.0
+                expected: ['jackal_node: General', 'jackal_node: Battery', 'jackal_node:
+                    User voltage supplies', 'jackal_node: Current consumption', 'jackal_node:
+                    Power consumption']
+              sensors:
+                type: diagnostic_aggregator/GenericAnalyzer
+                path: Sensor Topics
+                remove_prefix: 'jackal_node'
+                timeout: 5.0
+                expected: ['jackal_node: /imu/data_raw topic status', 'jackal_node: /navsat/nmea_sentence
+                    topic status']
+              teleop:
+                type: diagnostic_aggregator/GenericAnalyzer
+                path: Bluetooth Joystick
+                remove_prefix: 'bluetooth_teleop/joy_node'
+                timeout: 5.0
+                expected: ['bluetooth_teleop/joy_node: Joystick Driver Status']
+      forward:
+        realsense2_camera:
+          serial_no: ''
+          json_file_path: ''
+          rosbag_filename: ''
+          enable_pointcloud: false
+          pointcloud_texture_stream: RS2_STREAM_COLOR
+          pointcloud_texture_index: 0
+          enable_sync: true
+          align_depth: true
+          fisheye_width: 640
+          fisheye_height: 480
+          enable_fisheye: false
+          depth_width: 640
+          depth_height: 480
+          enable_depth: true
+          color_width: 640
+          color_height: 480
+          enable_color: true
+          infra_width: 640
+          infra_height: 480
+          enable_infra1: true
+          enable_infra2: true
+          fisheye_fps: 30
+          depth_fps: 30
+          infra_fps: 30
+          color_fps: 30
+          gyro_fps: 200
+          accel_fps: 250
+          enable_gyro: true
+          enable_accel: true
+          enable_t265: false
+          base_frame_id: acl_jackal/forward_link
+          depth_frame_id: acl_jackal/forward_depth_frame
+          infra1_frame_id: acl_jackal/forward_infra1_frame
+          infra2_frame_id: acl_jackal/forward_infra2_frame
+          color_frame_id: acl_jackal/forward_color_frame
+          fisheye_frame_id: acl_jackal/forward_fisheye_frame
+          fisheye1_frame_id: acl_jackal/forward_fisheye1_frame
+          fisheye2_frame_id: acl_jackal/forward_fisheye2_frame
+          accel_frame_id: acl_jackal/forward_accel_frame
+          gyro_frame_id: acl_jackal/forward_gyro_frame
+          pose_frame_id: acl_jackal/forward_pose_frame
+          depth_optical_frame_id: acl_jackal/forward_depth_optical_frame
+          infra1_optical_frame_id: acl_jackal/forward_infra1_optical_frame
+          infra2_optical_frame_id: acl_jackal/forward_infra2_optical_frame
+          color_optical_frame_id: acl_jackal/forward_color_optical_frame
+          fisheye_optical_frame_id: acl_jackal/forward_fisheye_optical_frame
+          fisheye1_optical_frame_id: acl_jackal/forward_fisheye1_optical_frame
+          fisheye2_optical_frame_id: acl_jackal/forward_fisheye2_optical_frame
+          accel_optical_frame_id: acl_jackal/forward_accel_optical_frame
+          gyro_optical_frame_id: acl_jackal/forward_gyro_optical_frame
+          pose_optical_frame_id: acl_jackal/forward_pose_optical_frame
+          aligned_depth_to_color_frame_id: acl_jackal/forward_aligned_depth_to_color_frame
+          aligned_depth_to_infra1_frame_id: acl_jackal/forward_aligned_depth_to_infra1_frame
+          aligned_depth_to_infra2_frame_id: acl_jackal/forward_aligned_depth_to_infra2_frame
+          aligned_depth_to_fisheye_frame_id: acl_jackal/forward_aligned_depth_to_fisheye_frame
+          aligned_depth_to_fisheye1_frame_id: acl_jackal/forward_aligned_depth_to_fisheye1_frame
+          aligned_depth_to_fisheye2_frame_id: acl_jackal/forward_aligned_depth_to_fisheye2_frame
+          spatial_frame_id: acl_jackal/forward_spatial
+          filters: ''
+          clip_distance: -1
+          linear_accel_cov: 0.01
+          initial_reset: false
+      velodyne_nodelet_manager_driver:
+        device_ip: ''
+        frame_id: acl_jackal/velodyne_link
+        model: VLP16
+        pcap: ''
+        port: 2368
+        read_fast: false
+        read_once: false
+        repeat_delay: 0.0
+        rpm: 600.0
+        gps_time: false
+        cut_angle: -0.01
+      velodyne_assemble_nodelet:
+        calibration: $(find velodyne_pointcloud)/params/VLP16db.yaml
+        min_range: 0.4
+        max_range: 130.0
+        cloud_ratio: 0.0
+        fast_cloud_ratio: 0.0
+        time_offset: -0.01
+        assembler:
+          fixed_frame: acl_jackal/odom
+          output_frame: acl_jackal/base
+          x_bound: 50.0
+          y_bound: 50.0
+          z_bound: 50.0
+          x_self_min: 0.5
+          xn_self_min: 0.75
+          y_self_min: 0.5
+          z_self_min: 1.75
+          resolution: 0.025
+          downsample: 3
+          trigger_time: 2.0
+          remove_ground_plane: false
+          ground_filter_distance: 0.1
+          platform: acl_jackal
+        fast_assembler:
+          topic: fast_assembled_cloud
+          fixed_frame: acl_jackal/odom
+          output_frame: acl_jackal/base
+          x_bound: 20.0
+          y_bound: 20.0
+          z_bound: 20.0
+          x_self_min: 0.5
+          xn_self_min: 0.75
+          y_self_min: 0.5
+          z_self_min: 1.75
+          resolution: 0.025
+          downsample: 3
+          trigger_time: 0.5
+          remove_ground_plane: false
+          platform: acl_jackal
+      velodyne_nodelet_manager_cloud:
+        calibration: $(find velodyne_pointcloud)/params/VLP16db.yaml
+        max_range: 130.0
+        min_range: 0.4
+        input_topic: velodyne_packets
+        output_topic: lidar_points
+      imu:
+        sensor_name: microstrain
+        port: /dev/imu
+        rate: 120
+        base_frame: acl_jackal/base
+        imu_frame: acl_jackal/microstrain_link_ned
+        autocalibrate: true
+        gyro_init_time: 5.0
+        time_offset: -0.04
+        use_raw_imu_time: false
+        enable_gps: false
+      imu_data_transformer_ned_enu:
+        target_frame: acl_jackal/microstrain_link
+      imu_data_transformer_enu_base:
+        target_frame: acl_jackal/base_link
+      jackal_joint_publisher:
+        type: "joint_state_controller/JointStateController"
+        publish_rate: 50
+      jackal_velocity_controller:
+        type: "diff_drive_controller/DiffDriveController"
+        left_wheel: ['front_left_wheel', 'rear_left_wheel']
+        right_wheel: ['front_right_wheel', 'rear_right_wheel']
+        publish_rate: 50
+        pose_covariance_diagonal: [0.001, 0.001, 1000000.0, 1000000.0, 1000000.0, 0.03]
+        twist_covariance_diagonal: [0.001, 0.001, 0.001, 1000000.0, 1000000.0, 0.03]
+        cmd_vel_timeout: 0.25
+        k_l: 0.1
+        k_r: 0.1
+        enable_odom_tf: false
+        wheel_separation_multiplier: 1.5
+        wheel_radius_multiplier: 1.0
+        linear:
+          x:
+            has_velocity_limits: true
+            max_velocity: 2.0
+            has_acceleration_limits: true
+            max_acceleration: 1.0
+        angular:
+          z:
+            has_velocity_limits: true
+            max_velocity: 4.0
+            has_acceleration_limits: true
+            max_acceleration: 5.0
+      base_frame_id: acl_jackal/base
+      odom_frame_id: acl_jackal/odom
+      twist_mux:
+        topics:
+        - name: joy
+          topic: joy_teleop/cmd_vel
+          timeout: 0.5
+          priority: 10
+        - name: interactive_marker
+          topic: twist_marker_server/cmd_vel
+          timeout: 0.5
+          priority: 8
+        - name: external
+          topic: cmd_vel
+          timeout: 0.5
+          priority: 1
+        locks:
+        - name: e_stop
+          topic: e_stop
+          timeout: 0.0
+          priority: 255
+      joy_teleop:
+        teleop_twist_joy:
+          axis_linear: 1
+          scale_linear: 0.4
+          scale_linear_turbo: 2.0
+          axis_angular: 3
+          scale_angular: 0.7
+          scale_angular_turbo: 1.4
+          enable_button: 4
+          enable_turbo_button: 5
+        joy_node:
+          deadzone: 0.1
+          autorepeat_rate: 20
+          dev: /dev/input/js0
+      twist_marker_server:
+        link_name: acl_jackal/base
+        robot_name: acl_jackal
+        marker_size_scale: 0.6
+      robot_state_publisher:
+        tf_prefix: acl_jackal
+      detector_manager_node:
+        autostart: true
+        config_file: /home/swarm/phoenix-r1/install/share/maskrcnn_benchmark_ros/configs/e2e_faster_rcnn_R_50_FPN_1x_t2_v5.yaml
+        model_file: /home/swarm/phoenix-r1/install/share/maskrcnn_benchmark_ros/models/t2_v5_0006000.pth
+        image_topic: /acl_jackal/forward/color/image_raw
+        use_gpu: true
+        min_image_size: 480
+        confidence: 0.8
+        remove_overlap: 1
+        overlap_threshold: 0.5
+      odometry:
+        odom_frame: acl_jackal/odom
+        base_frame: acl_jackal/base
+        basic_frame: acl_jackal/basic
+        enc_odom_topic: jackal_velocity_controller/odom
+        rate: 400.0
+        odom_time_offset: -0.04
+        odom_publish_offset: 0.015
+        disable_scan_matching: true
+        zero_hold: true
+        use_imu_orientation: true
+        sixdof_pose: true
+        use_accelerometer: true
+        cutoff_frequency: 0.1
+      world_model:
+        base_frame: acl_jackal/base
+        map_frame: acl_jackal/map
+      nlu:
+        fixed_frame: acl_jackal/map
+        base_frame: acl_jackal/base
+      point_cloud_estimator:
+        use_service: false
+        use_class_service: false
+        camera_info_topic: /acl_jackal/forward/color/camera_info
+        detection_topic: object_tracker/tracked_objects
+        pointcloud_topic: lidar_points
+      object_remappings:
+    # match: type regex / name regex
+    
+    # --------------------------------------------------
+    # Normalize object classes (for language grounding)
+    # --------------------------------------------------
+    
+    
+    # Barrel types
+      - match: ConstructionBarrel
+        type: barrel
+      - match: Barrel
+        type: barrel
+    
+   
+    # --------------------------------------------------
+    # Waypoint names
+    # --------------------------------------------------
+    
+      - match: region/[Ww]aypoint_[Aa]lpha
+        semantic: waypoint
+        alpha: true
+      - match: region/[Ww]aypoint_[Bb]ravo
+        semantic: waypoint
+        bravo: true
+      discrete_objects_cache:
+        platform: acl_jackal
+        global_frame: acl_jackal/map
+        static_frame: acl_jackal/odom
+        use_object_id_as_unique: true
+        simple_object_fusion: true
+        simple_object_fusion_resolution: 2.0
+        max_cache_size: 0
+        wm_object_track_threshold: 1.5
+        wm_object_removal: true
+        minimum_measurement_threshold: 3
+        blacklist: ["dumpster", "produce", "gas_pump", "case", "door", "vehicle", "tire",
+          "crate", "chair", "window", "person", "people", "weapons"]
+        base_frame: acl_jackal/base
+      gps_manager:
+        gps_frame: acl_jackal/gps
+        static_frame: acl_jackal/odom
+        base_frame: acl_jackal/base
+        platform: acl_jackal
+        utm_origin_x: 330620.0
+        utm_origin_y: 4322395.0
+        utm_origin_z: 0.0
+        rtkgps_format: false
+        planar_estimate: true
+        convergence_threshold: 0.1
+        recompute_estimate_threshold: 0.5
+        convergence_score_threshold: 0.25
+        external_pose_in_map_frame: false
+        use_delta_pose_test: true
+        use_delta_yaw_test: false
+      gps_visualizer:
+        efficient_visualizer: true
+        show_satellites: true
+      omnigraph:
+        platform: acl_jackal
+        movement_translation_thresh: 0.1
+        movement_rotation_thresh: 0.1
+        disable_icp: false
+        gps_frame_id: gps
+        gps_movement_translation_thresh: 1.0
+        planar_gps_factors: true
+        factor_type: ReferenceFrame
+        soft_gps_sigma: 50
+        gps_use_robust_factors: true
+        gps_robust_factor_type: Fair
+        reference_frame_max_measurements: 5
+        disable_local_loop_close: false
+        loop_close_query_queue_max_size: 10
+        loop_close_thread_rate: 5
+        loop_close_blanking_interval: 12
+        loop_close_max_distance: 5.0
+        loop_close_use_robust_factors: true
+        loop_close_robust_factor_type: Fair
+        discrete_object:
+          movement_translation_thresh: 0.25
+          movement_rotation_thresh: 0.25
+          sx: 0.25
+          sy: 0.25
+          sz: 0.25
+        force_resolve_time: 3.0
+        save_map: false
+        load_map: false
+        visualization:
+          odometry:
+            width: 0.2
+          icp:
+            width: 0.2
+          loop_close:
+            width: 0.2
+          gps:
+            width: 0.2
+          discrete_objects:
+            width: 0.01
+        frame_id: acl_jackal/map
+      goto_object_ioc_behavior:
+        execution_method: ioc
+        lookup_objects_server: /lookup_objects
+        change_goal_object_threshold: 1.0
+        change_goal_plan_threshold: 2.0
+        object_goal_radius: 1.0
+        robot_frame: acl_jackal/base
+        map_frame: acl_jackal/map
+        costmap:
+          footprint: [[-0.25, -0.22], [0.25, -0.22], [0.25, 0.22], [-0.25, 0.22]]
+          map_type: costmap
+          global_frame: acl_jackal/map
+          robot_base_frame: acl_jackal/base
+          update_frequency: 0.0
+          publish_frequency: 15.0
+          track_unknown_space: true
+          cost_scaling_factor: 1.0
+          always_send_full_costmap: true
+          plugins:
+          - {name: external_map, type: "occ_grid_costmap_plugin::OccupancyGridLayer"}
+    
+          external_map:
+            external_costmap: true
+            map_topic: /acl_jackal/global_costmap/costmap/costmap
+        planner:
+          total_allocated_time: 1.0
+          multiquery_mode: false
+      goto_object_behavior:
+        execution_method: native
+        lookup_objects_server: /lookup_objects
+        change_goal_object_threshold: 1.0
+        change_goal_plan_threshold: 2.0
+        object_goal_radius: 1.0
+        robot_frame: acl_jackal/base
+        map_frame: acl_jackal/map
+        costmap:
+          footprint: [[-0.25, -0.22], [0.25, -0.22], [0.25, 0.22], [-0.25, 0.22]]
+          map_type: costmap
+          global_frame: acl_jackal/map
+          robot_base_frame: acl_jackal/base
+          update_frequency: 0.0
+          publish_frequency: 15.0
+          track_unknown_space: true
+          cost_scaling_factor: 1.0
+          always_send_full_costmap: true
+          plugins:
+          - {name: external_map, type: "occ_grid_costmap_plugin::OccupancyGridLayer"}
+    
+          external_map:
+            external_costmap: true
+            map_topic: /acl_jackal/global_costmap/costmap/costmap
+        planner:
+          total_allocated_time: 1.0
+          multiquery_mode: false
+      approach_object_behavior:
+        lookup_objects_server: /lookup_objects
+        robot_frame: acl_jackal/base
+        rate: 10
+      intel_overlay:
+        heading_delta: 0.001
+      ioc_costmap_generator:
+        ioc_model_file: $(find ioc_traversal)/models/simple_test.p
+        feature_topics: [/acl_jackal/point_cloud_cache/renderers/full_map, /acl_jackal/visual_cache/grass,
+          /acl_jackal/visual_cache/road]
+      lidar_camera_projector:
+        info_topic: forward/camera_info
+        image_topic: forward/pixel_classification/labeled_image
+        original_topic: forward/pixel_classification/original_image
+        semantic_topic: forward/pixel_classification/semantic_image
+        service_topic: forward/segment_image
+        pcd_topic: lidar_points
+        fixed_frame: acl_jackal/odom
+        ontology_format: default
+      object_tracker:
+        platform: acl_jackal
+        image_topic: /acl_jackal/forward/color/image_raw
+        detection_topic: detection_out_topic
+        use_image_topic: false
+        use_detection_topic: true
+        tracker_type: NAIVE
+        reset_on_detection: true
+        filter_2class: true
+        detection_conf_threshold: 0.8
+        f2f_match_threshold: 0.0
+        missed_detection_threshold: 0
+        target_framerate: 20.0
+        visualize: true
+      acl_traj_follower:
+        ~L1_nom: 0.5
+        ~L1_gain: 0.8
+        ~vcmd_min: 0.2
+      local_planner_and_controller/costmap:
+        footprint: [[-0.25, -0.22], [0.25, -0.22], [0.25, 0.22], [-0.25, 0.22]]
+        map_type: costmap
+        global_frame: acl_jackal/odom
+        robot_base_frame: acl_jackal/base
+        update_frequency: 0.0
+        publish_frequency: 15.0
+        track_unknown_space: true
+        cost_scaling_factor: 1.0
+        always_send_full_costmap: true
+        plugins:
+        - {name: external_map, type: "occ_grid_costmap_plugin::OccupancyGridLayer"}
+    
+        external_map:
+          external_costmap: true
+          map_topic: /acl_jackal/local_costmap/costmap/costmap
+      local_costmap:
+        costmap:
+          footprint: [[-0.25, -0.22], [0.25, -0.22], [0.25, 0.22], [-0.25, 0.22]]
+          global_frame: acl_jackal/odom
+          robot_base_frame: acl_jackal/base
+          update_frequency: 10.0
+          publish_frequency: 20.0
+          track_unknown_space: true
+          always_send_full_costmap: true
+          transform_tolerance: 60.0
+          plugins:
+          - {name: recent_map, type: "occ_grid_costmap_plugin::OccupancyGridLayer"}
+          - {name: inflation, type: "costmap_2d::InflationLayer"}
+          - {name: footprint, type: "footprint_costmap_plugin::FootprintLayer"}
+    
+          recent_map:
+            use_full_probability: true
+            clear_probability_threshold: 40
+            closed_probability_threshold: 80
+            use_maximum: true
+            map_topic: /acl_jackal/local_point_cloud_cache/renderers/recent_map
+          inflation:
+            cost_scaling_factor: 1.0
+            inflation_radius: 2.0
+            inflate_unknown: true
+      navigation_manager:
+        global_replan_time: -1.0
+        compute_plan_retry_limit: 3
+        fail_on_local_stuck_threshold: 20.0
+        replan_on_local_failure: true
+        replan_on_local_stuck_threshold: 5.0
+        transform_shift_replan_threshold: 2.0
+        use_local_planner: true
+        global_frame: acl_jackal/map
+        base_frame: acl_jackal/base
+      global_planner:
+        maximum_plan_envelope: 1.0
+        primitive_filename: $(find navigation_launch)/primitives/resolution_10cm_curvature_20cm_turn_in_place.mprim
+        num_theta_dirs: 16
+        allocated_time: 1.0
+        initial_epsilon: 5.0
+        forward_search: false
+        nominalvel_mpersecs: 1.0
+        timetoturn45degsinplace_secs: 1.0
+        unknown_cell_cost: 225
+        probably_clear_cell_probability: 49
+        lethal_obstacle: 75
+        write_costmap_to_file: false
+        footprint: [[-0.25, -0.22], [0.25, -0.22], [0.25, 0.22], [-0.25, 0.22]]
+      local_planner:
+        action_frequency: 20.0
+        time_horizon: 2.5
+        max_vel_x: 1.0
+        max_vel_th: 1.0
+        use_carrot_goal: true
+        max_accel_x: 3.0
+        default_vel_x: 2.0
+        default_vel_w: 2.0
+        use_car_model: false
+        fix_initial_and_final_steering: false
+        allow_direction_switch_optimization: true
+        characteristic_length: 0.3
+        try_all_initial_conditions: false
+        maintain_curvature: true
+        wheel_base: 0.37465
+        optimize_v: true
+        time_delay: 0.24
+        weight_trajectory: 1.0
+        weight_curvature: 1.0
+        weight_progress: 0.5
+        weight_envelope: 0.0
+        weight_liveliness: 1.0
+        max_vel_x_step: 0.2
+        max_vel_th_step: 10.0
+        max_switching_time_step: 0.2
+        use_costmap: true
+        costmap_multiplier: 0.25
+        goal_xy_tolerance: 0.25
+        goal_theta_tolerance: 1.57
+        visualize_tested_trajectories: false
+        wheel_radius: 0.09
+        front_back_distance: 0.56
+        control_std: 4.0
+        temperature: 0.001
+        full_covariance: false
+      local_controller:
+        use_car_model: false
+        control_frequency: 15.0
+        max_vel_th: 3.333
+      global_planner/costmap:
+        footprint: [[-0.25, -0.22], [0.25, -0.22], [0.25, 0.22], [-0.25, 0.22]]
+        map_type: costmap
+        global_frame: acl_jackal/map
+        robot_base_frame: acl_jackal/base
+        update_frequency: 0.0
+        publish_frequency: 15.0
+        track_unknown_space: true
+        cost_scaling_factor: 1.0
+        always_send_full_costmap: true
+        plugins:
+        - {name: external_map, type: "occ_grid_costmap_plugin::OccupancyGridLayer"}
+    
+        external_map:
+          external_costmap: true
+          map_topic: /acl_jackal/global_costmap/costmap/costmap
+      global_costmap:
+        costmap:
+          footprint: [[-0.25, -0.22], [0.25, -0.22], [0.25, 0.22], [-0.25, 0.22]]
+          global_frame: acl_jackal/map
+          robot_base_frame: acl_jackal/base
+          update_frequency: 5.0
+          publish_frequency: 10.0
+          track_unknown_space: true
+          always_send_full_costmap: true
+          plugins:
+          - {name: full_map, type: "occ_grid_costmap_plugin::OccupancyGridLayer"}
+          - {name: external_constraint, type: "external_constraint_plugin::ExternalConstraintLayer"}
+          - {name: ioc, type: "occ_grid_costmap_plugin::OccupancyGridLayer"}
+          - {name: inflation, type: "costmap_2d::InflationLayer"}
+          - {name: footprint, type: "footprint_costmap_plugin::FootprintLayer"}
+    
+          full_map:
+            use_full_probability: true
+            clear_probability_threshold: 40
+            closed_probability_threshold: 60
+            use_maximum: true
+            map_topic: /acl_jackal/point_cloud_cache/renderers/full_map
+          ioc:
+            direct_costmap: true
+            map_topic: "ioc_costmap"
+            use_maximum: true
+            allow_resize: false
+          inflation:
+            cost_scaling_factor: 0.5
+            inflation_radius: 5.0
+            inflate_unknown: true
+          robot_obstacles:
+            ignore_base_frame: base
+      odom_frame: acl_jackal/odom
+      base_frame: acl_jackal/base
+    acl_jackal/visual_cache:
+      pose_graph_converter:
+        intopic: /acl_jackal/pose_graph
+        outtopic: map_from_odom
+        platform_name: acl_jackal
+      tf_converter:
+        in: semantic_stream
+        out: odom_from_cam
+        target_frame: acl_jackal/odom
+        tf_wait_time_secs: 0.5
+      pose_corrector:
+        in1: map_from_odom
+        in2: odom_from_cam
+        out: map_from_cam_all
+      tf_filter:
+        intopic: map_from_cam_all
+        outtopic: map_from_cam
+      terrain_projector:
+        project_to_horizon: false
+        range: 5
+        imagetopic: semantic_stream
+        posetopic: map_from_cam
+        terrain_output:
+          grass: [grass]
+          road: [gravel, asphalt]
+        gridtopic: /acl_jackal/point_cloud_cache/renderers/full_map
+        visualtopic: visual_markers
+    acl_jackal/point_cloud_pipeline:
+      transformer:
+        cloudtopic: /acl_jackal/lidar_points
+        outtopic: cloud
+        target_frame: acl_jackal/base
+      tf_streamer:
+        in: cloud
+        out: odom_from_base
+        target_frame: acl_jackal/odom
+      classifier:
+        cloud_input_topic: cloud
+        classification_output_topic: classification
+        binning_resolution: 0.1
+        min_points_in_bin: 1
+      local_cloud_to_grid:
+        classificationtopic: classification
+        posetopic: odom_from_base
+        cloudtopic: cloud
+        outtopic: grid/local
+        debugtopic: local_grid_debug
+        ground_ids: [0]
+        obstacle_ids: [1]
+        resolution: 0.1
+        clearing_min_range: 1.2
+        clearing_theta_bounds: 3.14159
+        max_range: 20
+        max_z: 100
+        time_threshold: 3.0
+      local_grid_composer:
+        intopic: grid/local
+        outtopic: /acl_jackal/local_point_cloud_cache/renderers/recent_map
+        clearing_min_range: 1.2
+        time_threshold: 3.0
+      keyframes:
+        in: odom_from_base
+        out: odom_from_base/keyframes
+        max_rate: 1
+        distance_threshold: 0.05
+        rotation_threshold: 0.087
+        stop_filter: true
+        startup_time: 30.0
+      point_cloud_keyframes:
+        key: odom_from_base/keyframes
+        in: cloud
+        out: cloud/keyframes
+      classification_keyframes:
+        key: odom_from_base/keyframes
+        in: classification
+        out: classification/keyframes
+      pose_graph_streamer:
+        intopic: /acl_jackal/pose_graph
+        outtopic: map_from_odom
+        platform_name: acl_jackal
+      tf_compose:
+        in1: map_from_odom
+        in2: odom_from_base/keyframes
+        out: map_from_base_all
+      tf_filter:
+        intopic: map_from_base_all
+        outtopic: map_from_base
+      omnigraph_notifier:
+        cloudtopic: cloud/low_res
+        posetopic: odom_from_base/keyframes
+        frame_notifications_topic: /acl_jackal/frame_notifications
+        platform_name: acl_jackal
+      keyframe_subsampler:
+        intopic: cloud/keyframes
+        outtopic: cloud/low_res
+        resolution: 0.1
+      keyframe_cloud_composer:
+        cloud_input_topic: cloud/low_res
+        transform_topic: map_from_base
+        cloud_output_topic: /acl_jackal/full_cloud
+        resolution: 0.1
+      keyframe_cloud_to_grid:
+        classificationtopic: classification/keyframes
+        posetopic: map_from_base
+        cloudtopic: cloud/keyframes
+        outtopic: grid/keyframes
+        debugtopic: grid_debug
+        ground_ids: [0]
+        obstacle_ids: [1]
+        resolution: 0.1
+      keyframe_grid_composer:
+        intopic: grid/keyframes
+        outtopic: /acl_jackal/point_cloud_cache/renderers/full_map
+      centroids:
+        intopic: cloud/low_res
+        outtopic: /acl_jackal/point_cloud_cache/renderers/centroids
+        platform_name: acl_jackal
+      relative_pose_icp_service:
+        topic: cloud/low_res
+        query_name: /acl_jackal/query_relative_pose
+        translation_threshold: 0.25
+        rotation_threshold: 0.3
+        fitness_score_max: 1.0
+        planar_mode: false
+        platform: acl_jackal
+      loop_close_icp_service:
+        topic: cloud/low_res
+        query_name: /acl_jackal/query_loop_close_relative_pose
+        fitness_score_max: 2.0
+        planar_mode: false
+        translation_threshold: 1.0
+        rotation_threshold: 0.25
+        platform: acl_jackal
+    iwm:
+      people_in_scene_threshold: 1000
+  </rosparam>
+  <param command="/home/swarm/phoenix/phoenix-r1/install/lib/xacro/xacro $(find hardware_launch)/urdf/robot.urdf.xacro calibrating:=False config:=$(find hardware_launch)/config/acl_jackal.yaml calibration_file:=$(find hardware_launch)/calibration/acl_jackal.yaml config_yaml:=&quot;{name: acl_jackal}&quot;" name="acl_jackal/robot_description" />
+<node pkg="barrel_scout" type="scout.py" name="barrel_detection_republisher" />
+<node pkg="message_to_tf" type="message_to_tf" args="/acl_jackal/jackal_velocity_controller/odom" name="odom_republisher" />
+
+</launch> 
