@@ -28,7 +28,7 @@ if __name__=="__main__":
     # instantiate rospack
     rospack = rospkg.RosPack()
     rospy.loginfo("Recording topics from {}".format("/config" + args.config))
-    topics_path = rospack.get_path("capstone_launch") + "/config/" + args.config
+    topics_path = rospack.get_path("dcist_medfield_launch") + "/config/" + args.config
 
     # import and parse topics
     if not os.path.isfile(topics_path):

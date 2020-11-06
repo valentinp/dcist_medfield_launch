@@ -51,3 +51,4 @@ ROBOT_NAME:  # these topics WILL have the robot name prepended ("blah" -> "chino
   - detected_objects
   - detector_manager_node/object_visualization
   - omnigraph/visuals
+  - global_costmap/costmap/costmap
