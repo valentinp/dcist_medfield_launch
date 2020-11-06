@@ -805,7 +805,7 @@
             allow_resize: false
           inflation:
             cost_scaling_factor: 0.5
-            inflation_radius: 5.0
+            inflation_radius: 1.0
             inflate_unknown: true
           robot_obstacles:
             ignore_base_frame: base
