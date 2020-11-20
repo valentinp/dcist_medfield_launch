@@ -59,4 +59,6 @@ ROBOT_NAME:  # these topics WILL have the robot name prepended ("blah" -> "chino
   - orcvio/poseout
   - orcvio/stable_feature_point_cloud
   - orcvio/visualization_image/compressed
-  - orcvio/visualization_markers
+  - orcvio/quadrics
+  - sort_ros/detection_image/compressed
+  - sort_ros/tracked_bounding_boxes
