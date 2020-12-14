@@ -1,6 +1,6 @@
-Medfield Game Day
+# Medfield Game Day Notes
 
-Steps
+## Jackal Steps
 1) Power on Jackal
 2) Connect to acl-jackal-2G on Intel Wireless
 Jackal:
@@ -16,7 +16,7 @@ Jackal:
 10) Record: rosrun dcist_medfield_launch bag.py --robot acl_jackal --prefix test_medfield --config acl_jackal_topics_medfield.yaml
 
 
-Diagnostics & Misc
+## Diagnostics & Misc
 
 rostopic hz /acl_jackal/forward/color/image_raw/compressed
 rostopic hz /acl_jackal/forward/imu
@@ -24,9 +24,9 @@ rostopic echo cl_jackal/barrel_scout/position
 rostopic echo /acl_jackal/jackal_velocity_controller/odom
 rosrun dynamic_reconfigure dynparam set /acl_jackal/forward/aligned_depth_to_color/image_raw/compressedDepth png_level 4
 
-Recording
+## Recording
 rosrun capstone_launch bag.py --robot acl_jackal --prefix medfield --config acl_jackal_topics_medfield.yaml
 
-Playback
-(on the laptop)
+## Playback
+(on basestation laptop)
 rosrun rviz rviz -d /home/swarm/phoenix/phoenix-r1/acl_jackal_medfield_replay.rviz
